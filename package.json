@@ -1,36 +1,25 @@
 {
-  "name": "social-media-rest-api",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
-  "scripts": {
-    "start": "NODE_ENV=development nodemon server.js",
-    "prod": "NODE_ENV=production nodemon server.js"
-  },
-  "author": "Muttaqin Muhammad",
-  "license": "ISC",
-  "dependencies": {
-    "agenda": "4.3.0",
-    "bcryptjs": "2.4.3",
-    "cloudinary": "1.32.0",
-    "config": "3.3.8",
-    "cookie-parser": "1.4.6",
-    "cors": "2.8.5",
-    "dotenv": "16.0.2",
-    "express": "4.18.1",
-    "express-session": "1.17.3",
-    "express-validator": "6.14.2",
-    "jsonwebtoken": "8.5.1",
-    "mongoose": "6.6.1",
-    "multer": "1.4.5-lts.1",
-    "nodemailer": "6.7.8",
-    "passport": "0.6.0",
-    "passport-google-oauth": "2.0.0",
-    "socket.io": "4.5.2"
-  },
-  "devDependencies": {
-    "morgan": "1.10.0",
-    "nodemon": "2.0.20",
-    "prettier": "2.7.1"
-  }
+    "name": "nodejs-social-media-rest-api",
+    "version": "1.0.0",
+    "main": "src/server.js",
+    "repository": "git@github.com:muttaqin1/nodejs-social-media-rest-api.git",
+    "author": "muttaqin1 <mdmuttaqin20@gmail.com>",
+    "license": "MIT",
+    "dependencies": {
+        "cloudinary": "1.32.0",
+        "dotenv": "16.0.3",
+        "express": "4.18.2",
+        "express-validator": "6.14.2",
+        "jsonwebtoken": "8.5.1",
+        "mongoose": "6.8.0",
+        "multer": "1.4.5-lts.1",
+        "passport": "0.6.0",
+        "passport-google-oauth": "2.0.0",
+        "socket.io": "4.5.4"
+    },
+    "devDependencies": {
+        "morgan": "1.10.0",
+        "nodemon": "2.0.20",
+        "prettier": "2.8.1"
+    }
 }

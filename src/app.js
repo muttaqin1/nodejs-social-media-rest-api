@@ -2,7 +2,8 @@
 const express = require('express')
 const http = require('http')
 const app = express()
-require('dotenv').config()
+const path = require('path')
+require('dotenv').config({ path: path.join(__dirname, '../.env') })
 const server = http.createServer(app)
 
 //socket
