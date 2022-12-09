@@ -1,12 +1,13 @@
 const server = require('./app')
-const database = require('./database')
-const config = require('config')
+const { connection } = require('./database')
+const {
+    server: { port },
+} = require('./config')
 
-database().catch((err) => {
+connection().catch((err) => {
     console.log(err)
 })
 
-const PORT = config.get('port')
-server.listen(PORT, () => {
-    console.log(`server is running on ${PORT}`)
+server.listen(port, () => {
+    console.log(`server is running on ${port}`)
 })

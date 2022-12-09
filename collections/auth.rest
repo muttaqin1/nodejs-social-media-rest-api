@@ -1,0 +1,27 @@
+//domail
+http://localhost:8080
+
+
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vZXhhbXBsZS5jb20iLCJhdWQiOiJleGFtcGxlIGZvbGxvd2VycywiLCJzdWIiOiI2MzkzMDMyMWFhYmZjZGQ0MzkwNzVhMjUiLCJhY2Nlc3NUb2tlbktleSI6ImFjNTkyYTk0NGNiMjAwMzcyYTBjMmFiNWI4M2I0MmZmNWFmM2MxZTA3ODhiYmEyZDA5N2UyZGZmYjBiMmJiNGQ3NDcxMzgxODZjOWNlMmNkNGRlNDdmZTA5ZjdlNTY0MzhmMmVmNzc5YjVlNDMxOWI1Mjg2M2MyYjcwODRmYWM3IiwiaWF0IjoxNjcwNTgwNzcxLCJleHAiOjEwMzEwNTgwNzcxfQ.PL2h9t-uEjaE0mAmgGJwRd6Bq-Dvm8ZSsTMVfw2-RVxqYHxLCPEEXeZQXYT2nIuEH3eNBFB1l_n-fNvHi-0WqI0X7O3uqfrjvQWwCx7P3YFl6ppS6Qabg2ZOjpeRf4rCxWnX2aLsX3MozG50m5qIFQMuKktF-z4s4VN2QJYyfoFXTgsv9Ngqfm2uqrnSPRxBfdgvC9jTykYRmh_8W1ESaAevTHf-023KoWznz99Jx7wHoVMn4RozVlxrWUfkXOpPaNXMM8y0p1qVD-O1s6FaAqqHkGa--B-n0sQETqOD6KxlZE4jis_CksKe2Yolt0PGbTr7gnEWKU96GatMwa3jOXozCTLKfG_npjR9WFy-pQfIC_Bdxjr20A_j4bGzoeLB9r6iyYYIJrHpOvSzJwpRfFT0Q6O0hKCch9_uRQu5KM_u58m6zgzvTEJ_Mdpik6bc_Ef7BSP9toV9KXx1cxVpyeHJlgW96XA9dmS3xiTCsF8X7ojPNgAjJZiIbbeK4M5Za0bjefcFkDJ1Si5wiMcXqBXtTatvgbUQdpo6uj-rKLAkwAqlS9Hmc0MgmjIumXX9E07_gMNKuMHOE8lOq0U690hDWLbd9qQ8M6cHcjYgnC9Dco0qWlc8UstwN-l-28TFGheKzfVh83A4HDEDprzEvmf46CP25tmj_teNqEMZJTs
+--
+
+--
+
+POST /api/auth/signup 
+{
+"name":"Muttaqin Muhammad",
+"email":"mdmuttaqin20@gmail.com",
+"password":"12345678",
+"birthday":"11/03/2003",
+"gender":"male"
+}
+--
+POST /api/auth/signin 
+{
+"email":"mdmuttaqin20@gmail.com",
+"password":"12345678"
+}
+
+--
+DELETE /api/auth/signout
