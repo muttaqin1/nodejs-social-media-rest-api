@@ -1,9 +1,11 @@
 module.exports = {
+    app_name: process.env.APP_NAME,
     server: {
         port: process.env.PORT || 8080,
+        host: process.env.HOST,
     },
     database: {
-        mongo_uri: `${process.env.MONGO_URI}/social-media-app`,
+        mongo_uri: `${process.env.MONGO_URI}/${process.env.APP_NAME}`,
     },
     nodemailer: {
         smtpEmail: process.env.SMTP_EMAIL,

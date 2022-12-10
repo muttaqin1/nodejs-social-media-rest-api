@@ -1,5 +1,5 @@
-const crypto = require('crypto')
-const { Schema, model } = require('mongoose')
+const crypto = require('crypto');
+const { Schema, model } = require('mongoose');
 
 const userSchema = new Schema(
     {
@@ -16,6 +16,7 @@ const userSchema = new Schema(
             unique: true,
             lowercase: true,
         },
+        verified: { type: Boolean, default: false },
         avatar: {
             public_id: String,
             url: String,
@@ -33,6 +34,7 @@ const userSchema = new Schema(
             trim: true,
             select: false,
         },
+        roles: [{ type: Number, required: true }],
         birthday: {
             type: String,
             required: true,
@@ -49,12 +51,22 @@ const userSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: 'Profile',
         },
+        createdAt: {
+            type: Date,
+            default: Date.now,
+            select: false,
+        },
+        updatedAt: {
+            type: Date,
+            default: Date.now,
+            select: false,
+        },
     },
     {
         versionKey: false,
     }
-)
+);
 
-const User = new model('User', userSchema)
+const User = new model('User', userSchema);
 
-module.exports = User
+module.exports = User;

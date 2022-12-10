@@ -1,8 +1,9 @@
 const nodemailer = require('nodemailer')
+const { smtpEmail, smtpPassword } = require('../config')
 
 module.exports = async ({ title, body, emailReciever }) => {
     const mailOptions = {
-        from: SMTP_EMAIL,
+        from: smtpEmail,
         to: emailReciever,
         subject: title,
         text: body,
@@ -10,8 +11,8 @@ module.exports = async ({ title, body, emailReciever }) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: SMTP_EMAIL,
-            pass: SMTP_PASSWORD,
+            user: smtpEmail,
+            pass: smtpPassword,
         },
         port: 465,
         host: 'smtp@gmail.com',

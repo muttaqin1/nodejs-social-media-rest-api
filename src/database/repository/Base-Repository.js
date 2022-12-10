@@ -19,40 +19,76 @@ class BaseRepository {
         }
     }
     async FindById(id) {
-        return await this.model.findById(id)
+        try {
+            return await this.model.findById(id)
+        } catch {
+            throw new ApiError(`Data not found!`)
+        }
     }
-    async Find(object = {}) {
-        return await this.model.find(object)
+    async Find(query) {
+        try {
+            return await this.model.find(query)
+        } catch {
+            throw new ApiError('Data not found!')
+        }
     }
     async FindOne(query, select) {
-        return await this.model.findOne(query).select(select)
+        try {
+            return await this.model.findOne(query).select(select)
+        } catch {
+            throw new ApiError('Data not found!')
+        }
     }
     async Update(query, update) {
-        return await this.model.findOneAndUpdate(query, update, { new: true })
+        try {
+            return await this.model.findOneAndUpdate(query, update, { new: true })
+        } catch {
+            throw new ApiError('Failed to update data!')
+        }
     }
     async DeleteOne(query) {
-        return await this.model.deleteOne(query)
+        try {
+            return await this.model.deleteOne(query)
+        } catch {
+            throw new ApiError('Failed to delete data!')
+        }
     }
 
     async SetData(query, values) {
-        return await this.Update(query, {
-            $set: values,
-        })
+        try {
+            return await this.Update(query, {
+                $set: values,
+            })
+        } catch {
+            throw new ApiError('Failed to set data!')
+        }
     }
     async UnsetData(query, values) {
-        return await this.Update(query, {
-            $unset: values,
-        })
+        try {
+            return await this.Update(query, {
+                $unset: values,
+            })
+        } catch {
+            throw new ApiError('Failed to unset data!')
+        }
     }
     async PushData(query, values) {
-        return await this.Update(query, {
-            $push: values,
-        })
+        try {
+            return await this.Update(query, {
+                $push: values,
+            })
+        } catch {
+            throw new ApiError('Failed to push data!')
+        }
     }
     async PullData(query, values) {
-        return await this.Update(query, {
-            $pull: values,
-        })
+        try {
+            return await this.Update(query, {
+                $pull: values,
+            })
+        } catch {
+            throw new ApiError('Failed to pull data!')
+        }
     }
 }
 
