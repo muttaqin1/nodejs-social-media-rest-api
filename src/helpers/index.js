@@ -5,7 +5,7 @@ module.exports = {
     sendMail: require('./sendMail'),
     codeGenerator: require('./codeGenerator'),
     fileUpload: {
-        singleFileUploader: require('./fileUpload/singleImageUploader'),
+        singleImageUploader: require('./fileUpload/singleImageUploader'),
         cloudinary: require('./fileUpload/cloudinary'),
     },
 };

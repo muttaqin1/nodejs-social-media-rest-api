@@ -1,17 +1,17 @@
-//domail
-http://localhost:6000
+//domain
+//domain
+http://localhost:4000
 
-
+#this headers will sended to every request
 Content-Type: application/json
-Authorization:Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vZXhhbXBsZS5jb20iLCJhdWQiOiJleGFtcGxlIGZvbGxvd2VycywiLCJzdWIiOiI2MzkzMDMyMWFhYmZjZGQ0MzkwNzVhMjUiLCJhY2Nlc3NUb2tlbktleSI6ImNkOWM1OThkY2ZmMzkwZjc0ZTVkOTdiMGNlNTFiYTYzNWQ2NWUzYzg5YzE5YTA1ODdkODBmYjVjMmQwZjMwYjYwNTkxNDVhZGQ2ODY4NGE0OTQ4OWI4NzZiOGQzNGJmOWJjYjE4MDBmZGEyMTY1MGI3ZDJkMmYxNmU3YTdlZjMzIiwiaWF0IjoxNjcwNjY5ODI4LCJleHAiOjEwMzEwNjY5ODI4fQ.cMDglfzWIEvUpVEV7kuBm8sZUobuPCsIRZn7bP38-xmABiTT68VDCffSD0O3fjfEiwPiG3XMuaeBdwYYmE-MPDSr8OJkA1qkbSScJD0W3YDEE3DjvRySnXQAHyhsLNrZu9m7jHM87N01w14YAjLICXYJTIl-2jAIBDAY0MfTfGo3SUVH8LZVrOFkwxnfw6bXVXVapKmxitJrzXOb9ZGqDlcHsTfg76XHEGD8Qm8oZBHHdxhnfI3_3967J4-K9KrK1fAWC1CstXlPz_WC2fdk_y7CInmAYE3tRqyvMYcC38QfPPqC_WNX8AKrhjrJTnOj5Y5NpeRQqwDDnxuqztdOCWo-U85O59cxijLPEXO_LPf3VBVxF5vMVeYbvY4EvPAdazGbKCiYXYoWfI6TkJna0-Zvgx1gKgpe-0NxOjZqVxpfFb3dDQBCSu2wRgRgWJhejuCx1BooDSGBoiMIn4VM7ZTh1qKvEBYTTbaX-8RwgOG6ycmmD9-J-4kiNGiuAn_HpAgrFBqN2t_6C5erEwA8jUv0AG1tlKDmMlcDzkhDrDH29Yziu-WNZhIjXuv9q6Aotq0yfXIQAUiYVYhU-DUBN3CNTlzZk1LuG_nZegrHqHQ_27maLSWAM4XU3NJpLouMH8tsVVWDgGbbSF0DvjzKXAqKH9G_W05cA7oVO_OcPyI
+Authorization: Bearer [your access token]
 --
 --
-
 POST /api/auth/signup 
 {
 "name":"Muttaqin Muhammad",
 "email":"mdmuttaqin20@gmail.com",
-"password":"12345678",
+"password":"Muttaqin@123",
 "birthday":"11/03/2003",
 "gender":"male"
 }
@@ -19,7 +19,7 @@ POST /api/auth/signup
 POST /api/auth/signin 
 {
 "email":"mdmuttaqin20@gmail.com",
-"password":"12345678"
+"password":"Muttaqin@123"
 }
 
 --
@@ -27,3 +27,34 @@ DELETE /api/auth/signout
 
 --
 PUT /api/auth/token-refresh 
+
+--
+POST /api/auth/verify/cb7837e0b9c411ad21913542767b700c574316dd6229869d8a
+
+--
+POST /api/auth/resend-token
+{
+  "email":"mdmuttaqin20@gmail.com"
+}
+--
+POST /api/auth/password/forgot-password
+{
+"email":"mdmuttaqin20@gmail.com"
+}
+--
+POST /api/auth/2fa/verify/venuegbugbgb
+{
+  "otp":"fneiff"
+}
+--
+POST /api/auth/password/reset/djfneifnen 
+{
+ "password":"Muttaqin@456"
+}
+
+--
+POST /api/auth/password 
+{
+  "oldPassword":"Muttaqin@123",
+  "newPassword":"Muttaqin@456"
+}

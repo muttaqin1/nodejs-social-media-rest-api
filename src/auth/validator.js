@@ -1,4 +1,4 @@
-const { header } = require('express-validator');
+const { header, cookie } = require('express-validator');
 const {
     AppError: { BadRequestError },
 } = require('../helpers');
@@ -17,4 +17,6 @@ const validator = [
         }),
 ];
 
-module.exports = { AuthBearer: [validator, validationResult] };
+module.exports = {
+    AuthBearer: [validator, validationResult],
+};

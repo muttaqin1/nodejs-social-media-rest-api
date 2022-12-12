@@ -1,17 +1,15 @@
 const {
     AppError: { NotFoundError },
-} = require('../helpers')
+} = require('../helpers');
+const { ApiResponse } = require('../helpers');
 const errorHandler = (err, req, res, next) => {
-    if (res.headerSent) return next(err)
+    if (res.headerSent) return next(err);
 
-    console.log(err)
-    res.status(500).json({
-        success: false,
-        statusCode: err.statusCode,
-        message: err.message,
-    })
-}
+    console.log(err);
+    const status = err.statusCode || 500;
+    new ApiResponse(res).status(status).msg(err.message).send();
+};
 
-const notFound = (req, res, next) => next(new NotFoundError())
+const notFound = (req, res, next) => next(new NotFoundError());
 
-module.exports = [notFound, errorHandler]
+module.exports = [notFound, errorHandler];

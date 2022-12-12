@@ -1,56 +1,60 @@
 const {
     AppError: { ApiError },
-} = require('../../helpers')
+} = require('../../helpers');
 
 class BaseRepository {
     constructor(model, name) {
-        this.model = model
-        this.name = name
+        this.model = model;
+        this.name = name;
     }
     GetModel() {
-        return this.model
+        return this.model;
     }
 
     async Create(object) {
         try {
-            return await this.model.create(object)
+            return await this.model.create(object);
         } catch (e) {
-            throw new ApiError(`Failed to create ${this.name}`)
+            throw new ApiError(`Failed to create ${this.name}`);
         }
     }
     async FindById(id) {
         try {
-            return await this.model.findById(id)
+            return await this.model.findById(id);
         } catch {
-            throw new ApiError(`Data not found!`)
+            throw new ApiError(`Data not found!`);
         }
     }
     async Find(query) {
         try {
-            return await this.model.find(query)
+            return await this.model.find(query);
         } catch {
-            throw new ApiError('Data not found!')
+            throw new ApiError('Data not found!');
         }
     }
-    async FindOne(query, select) {
+    async FindOne(query, options) {
         try {
-            return await this.model.findOne(query).select(select)
-        } catch {
-            throw new ApiError('Data not found!')
+            return await this.model
+                .findOne(query)
+                .select(options?.select)
+                .populate(options?.populate);
+        } catch (e) {
+            console.log(e);
+            throw new ApiError('Data not found!');
         }
     }
     async Update(query, update) {
         try {
-            return await this.model.findOneAndUpdate(query, update, { new: true })
+            return await this.model.findOneAndUpdate(query, update, { new: true });
         } catch {
-            throw new ApiError('Failed to update data!')
+            throw new ApiError('Failed to update data!');
         }
     }
     async DeleteOne(query) {
         try {
-            return await this.model.deleteOne(query)
+            return await this.model.deleteOne(query);
         } catch {
-            throw new ApiError('Failed to delete data!')
+            throw new ApiError('Failed to delete data!');
         }
     }
 
@@ -58,38 +62,38 @@ class BaseRepository {
         try {
             return await this.Update(query, {
                 $set: values,
-            })
+            });
         } catch {
-            throw new ApiError('Failed to set data!')
+            throw new ApiError('Failed to set data!');
         }
     }
     async UnsetData(query, values) {
         try {
             return await this.Update(query, {
                 $unset: values,
-            })
+            });
         } catch {
-            throw new ApiError('Failed to unset data!')
+            throw new ApiError('Failed to unset data!');
         }
     }
     async PushData(query, values) {
         try {
             return await this.Update(query, {
                 $push: values,
-            })
+            });
         } catch {
-            throw new ApiError('Failed to push data!')
+            throw new ApiError('Failed to push data!');
         }
     }
     async PullData(query, values) {
         try {
             return await this.Update(query, {
                 $pull: values,
-            })
+            });
         } catch {
-            throw new ApiError('Failed to pull data!')
+            throw new ApiError('Failed to pull data!');
         }
     }
 }
 
-module.exports = BaseRepository
+module.exports = BaseRepository;

@@ -3,4 +3,5 @@ module.exports = {
     AuthUtils: require('./AuthUtils'),
     Authentication: require('./Authentication'),
     Authorization: require('./Authorization'),
-}
+    validator: require('./validator'),
+};

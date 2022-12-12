@@ -1,0 +1,43 @@
+//domain
+http://localhost:4000
+
+//this headers will sended to every request
+Content-Type: application/json
+Authorization: Bearer [your access token]
+--
+--
+POST /api/user/profile 
+{
+"nickname":"coder",
+"bio":"this is a bio",
+"occupation":"student",
+"worksAt":"msb delivery service limited",
+"address":{
+  "city":"dhaka", 
+  "country":"Bangladesh", 
+  "zipCode":1216,
+ "homeAddress":"hidden"
+}
+}
+
+--
+PUT /api/user/profile 
+{
+"nickname":"coder",
+"bio":"this is a bio",
+"occupation":"student",
+"worksAt":"msb delivery service limited",
+"address":{
+  "city":"dhaka", 
+  "country":"Bangladesh", 
+  "zipCode":1216,
+ "homeAddress":"hidden"
+},
+"hobbies":["singing","dancing"]
+}
+
+--
+GET /api/user/profile
+
+--
+GET /api/user/profile/6395b5643c6d8e24

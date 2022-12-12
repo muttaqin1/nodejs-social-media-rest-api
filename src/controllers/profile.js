@@ -1,4 +1,7 @@
 const {
+    user: { defaultAvatar },
+} = require('../config');
+const {
     fileUpload: {
         cloudinary: { uploader },
     },
@@ -13,26 +16,27 @@ const {
 
 const getUserProfile = async (req, res, next) => {
     const { id } = req.params;
-    const profile = await profileRepository
-        .FindOne({
+    const profile = await profileRepository.FindOne(
+        {
             user: id,
-        })
-        .populate('posts followers following user');
+        },
+        { populate: 'user following followers friends' }
+    );
     if (!profile) throw new NotFoundError('Profile Not Found!');
     new ApiResponse(res).data({ profile }).send();
 };
 
 const getMyProfile = async (req, res, next) => {
     const { _id: userId } = req.user;
-    const profile = await profileRepository
-        .FindOne({
+    const profile = await profileRepository.FindOne(
+        {
             user: userId,
-        })
-        .populate('user following followers posts friends');
+        },
+        { populate: 'user following followers friends' }
+    );
     if (!profile) throw new NotFoundError('Profile Not Found!');
     new ApiResponse(res).data({ profile }).send();
 };
-
 const createProfile = async (req, res, next) => {
     const { nickname, bio, address, occupation, worksAt, hobby } = req.body;
     const { _id: userId, name } = req.user;
@@ -48,10 +52,11 @@ const createProfile = async (req, res, next) => {
     };
 
     if (req?.image) data.avatar = req.image;
-    const isprofileExist = await profileRepository.FindOne({
+    else data.avatar = defaultAvatar;
+    const exists = await profileRepository.FindOne({
         user: userId,
     });
-    if (isprofileExist && isprofileExist?._id) throw new BadRequestError('Profile Already Exists!');
+    if (exists && exists?._id) throw new BadRequestError('Profile Already Exists!');
     const profile = await profileRepository.Create(data);
     await userRepository.SetData(
         {
@@ -65,30 +70,18 @@ const createProfile = async (req, res, next) => {
 };
 
 const editProfile = async (req, res, next) => {
-    const { nickname, bio, address, occupation, worksAt, hobbies } = req.body;
-    const { _id: userId } = req.user;
-
-    const data = {
-        nickname,
-        bio,
-        address,
-        occupation,
-        worksAt,
-        hobbies,
-    };
+    const { profile: userProfile } = req.user;
     if (req.image) {
-        const profile = await profileRepository.FindOne({
-            user: userId,
-        });
-        if (profile?.avatar?.public_id) await uploader.destroy(profile.avatar.public_id);
-        data.image = req.image;
+        const profile = await profileRepository.FindOne({ _id: userProfile });
+        if (profile) await uploader.destroy(profile?.avatar?.public_id);
+        req.body.avatar = req.image;
     }
 
     const editedProfile = await profileRepository.SetData(
         {
-            user: userId,
+            _id: userProfile,
         },
-        data
+        req.body
     );
     new ApiResponse(res).data({ editedProfile }).send();
 };

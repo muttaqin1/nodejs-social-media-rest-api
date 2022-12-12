@@ -24,7 +24,7 @@ const profileSchema = new Schema(
         address: {
             country: String,
             city: String,
-            zipcode: String,
+            zipCode: Number,
             homeAddress: String,
         },
         occupation: String,

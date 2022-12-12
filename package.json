@@ -2,6 +2,11 @@
     "name": "nodejs-social-media-rest-api",
     "version": "1.0.0",
     "main": "src/server.js",
+    "private": "true",
+    "scripts": {
+        "dev": "nodemon src/server.js",
+        "prod": "nodemon src/server.js"
+    },
     "repository": "git@github.com:muttaqin1/nodejs-social-media-rest-api.git",
     "author": "muttaqin1 <mdmuttaqin20@gmail.com>",
     "license": "MIT",

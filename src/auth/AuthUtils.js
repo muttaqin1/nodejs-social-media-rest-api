@@ -64,14 +64,15 @@ class AuthUtils {
             throw new ApiError();
         }
     }
-    static async SendVerificationEmail({ name, email }, token) {
+    static async SendVerificationEmail({ name, email }, { token }) {
         const title = 'Account verification token.';
         const body = `<h5>Hi, ${name}</h5><br><p>Please click on the following <a href="${`http://${host}/api/auth/verify-token/${token}`}">link</a> to verify your account.</p> 
                   <br><p>If you dont send this request you can ignore this email.</p>`;
         try {
-            return await sendMail({ title, body, email });
-        } catch {
-            throw new ApiError();
+            const emailReciever = email;
+            return await sendMail({ title, body, emailReciever });
+        } catch (e) {
+            throw new ApiError(e.message);
         }
     }
     static async Send2FAMail({ name, email }, otp) {

@@ -2,7 +2,7 @@ const { body } = require('express-validator');
 const { UserRepository } = require('../../../database');
 const userRepository = new UserRepository();
 const {
-    AppError: { BadRequestError, ApiError },
+    AppError: { ValidationError, ApiError },
 } = require('../../../helpers');
 const { validationResult } = require('../../../middlewares');
 
@@ -10,41 +10,54 @@ const validator = [
     body('name')
         .not()
         .isEmpty()
-        .withMessage('name can not be empty!')
+        .withMessage('Name can not be empty!')
+        .isString()
+        .withMessage('Name must be valid string.')
         .isLength({ max: 32 })
-        .withMessage("name can't be more than 32 characters!")
+        .withMessage("Name can't be more than 32 characters!")
         .trim(),
     body('email')
+        .isString()
+        .withMessage('Email must be valid string.')
         .isEmail()
-        .withMessage('invalid email address')
+        .withMessage('Invalid email address')
         .custom(async (val) => {
             try {
-                const user = await userRepository.Find({ email: val });
-                if (user) throw new BadRequestError('User already exist');
+                const user = await userRepository.FindOne({ email: val });
+                if (user) throw new ValidationError('User already exist');
+                return true;
             } catch (e) {
-                throw new Error(e);
+                throw new ApiError();
             }
         })
-        .withMessage('email already exist!')
+        .withMessage('Email is already associated with another account.')
         .trim(),
     body('password')
         .not()
         .isEmpty()
-        .withMessage('password can not be empty!')
+        .withMessage('Password can not be empty!')
+        .isString()
+        .withMessage('Password must be valid string.')
         .isStrongPassword()
         .withMessage(
-            'password must contain one capital letter one small letter one number and one character'
-        ),
-    body('salt').custom((salt) => {
-        if (!salt) throw new ApiError();
-        return true;
-    }),
+            'Password must contain one capital letter one small letter one number and one character'
+        )
+        .trim(),
     body('birthday')
         .not()
         .isEmpty()
-        .withMessage('birthday can not be empty!')
+        .withMessage('Birthday can not be empty!')
+        .isString()
+        .withMessage('Birthday must be valid string')
         .isLength({ max: 30 })
-        .withMessage("birthdayc can't be more than 30 characters!")
+        .withMessage("Birthdayc can't be more than 30 characters!")
+        .trim(),
+    body('gender')
+        .not()
+        .isEmpty()
+        .withMessage('Gender is required.')
+        .isIn(['male', 'female', 'custom'])
+        .withMessage('Gender can be male, female, custom')
         .trim(),
 ];
 module.exports = [validator, validationResult];
