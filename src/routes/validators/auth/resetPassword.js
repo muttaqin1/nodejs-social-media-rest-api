@@ -1,5 +1,4 @@
 const { body } = require('express-validator');
-const { validationResult } = require('../../../middlewares');
 const objectId = require('../objectId');
 
 const validator = [
@@ -16,4 +15,4 @@ const validator = [
         .trim(),
     objectId('token'),
 ];
-module.exports = [validator, validationResult];
+module.exports = validator;

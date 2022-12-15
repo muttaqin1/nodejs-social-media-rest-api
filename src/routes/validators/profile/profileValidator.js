@@ -1,5 +1,4 @@
 const { body } = require('express-validator');
-const { validationResult } = require('../../../middlewares');
 const validator = [
     body('nickname')
         .isString()
@@ -58,4 +57,4 @@ const validator = [
         .trim(),
     body('hobbies').if(body('hobbies').exists()).isArray().withMessage('Hobbies must be an array.'),
 ];
-module.exports = [validator, validationResult];
+module.exports = validator;

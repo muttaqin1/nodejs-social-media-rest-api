@@ -1,5 +1,4 @@
 const { body } = require('express-validator');
-const { validationResult } = require('../../../middlewares');
 
 const validator = [
     body('oldPassword')
@@ -26,4 +25,4 @@ const validator = [
         .trim(),
 ];
 
-module.exports = [validator, validationResult];
+module.exports = validator;

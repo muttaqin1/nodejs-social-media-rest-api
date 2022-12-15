@@ -51,7 +51,7 @@ const signUp = async (req, res, next) => {
 
 const signIn = async (req, res, next) => {
     const { email, password } = req.body;
-    const user = await userRepository.FindOne({ email }, '+password +salt');
+    const user = await userRepository.FindOne({ email }, { select: '+password +salt' });
     if (!user) throw new BadRequestError('The email is not associated with any account.');
     if (!user.password) throw new BadRequestError('Credential not set.');
     const match = await AuthUtils.ValidatePassword(password, user?.password, user?.salt);

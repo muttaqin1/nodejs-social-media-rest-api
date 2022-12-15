@@ -1,5 +1,4 @@
 const { param } = require('express-validator');
-const { validationResult } = require('../../../middlewares');
 const {
     AppError: { ValidationError },
 } = require('../../../helpers');
@@ -10,4 +9,4 @@ const validator = [
     }),
 ];
 
-module.exports = [validator, validationResult];
+module.exports = validator;

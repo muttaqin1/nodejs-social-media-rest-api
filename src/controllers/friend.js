@@ -1,342 +1,158 @@
-const User = require('../models/User')
-const Profile = require('../models/Profile')
-const Notification = require('../models/Notification')
+const { ProfileRepository, NotificationRepository } = require('../database');
+
+const profileRepository = new ProfileRepository();
+const notificationRepository = new NotificationRepository();
+const {
+    AppError: { BadRequestError, ForbiddenError },
+} = require('../helpers');
+const ApiResponse = require('../helpers');
 
 const followAndUnfollow = async (req, res, next) => {
-  //profile id whom i want to follow
-  const { userId } = req.params
-  try {
-    const profileToFollow = await Profile.findOne({
-      //searching the profile
-      user: userId
-    })
-    const profileId = profileToFollow._id
+    const { id: userId } = req.params;
+    const { _id: loggedInUserId } = req.user;
 
-    const loggedInUserProfile = await Profile.findOne({
-      user: req.user._id
-    }) //searching the logged in user profile
+    const profileToFollow = await profileRepository.FindOne({ user: userId });
+    if (!profileToFollow)
+        throw new BadRequestError('The person you want to follow dont have a profile.');
 
-    if (
-      !profileToFollow ||
-      !loggedInUserProfile ||
-      profileToFollow.user.toString() === loggedInUserProfile.user.toString()
-    ) {
-      throw new Error('profile deesnt exist!')
-    }
+    const loggedInUserProfile = await profileRepository.FindOne({ user: loggedInUserId }); //searching the logged in user profile
+    if (!loggedInUserProfile) throw new BadRequestError('Profile is required to follow someone!');
+
+    if (profileToFollow?.user?.toString() === loggedInUserProfile?.user?.toString())
+        throw new ForbiddenError();
     //checking if the logged in user already follows the person .then i will let him unfollow the user
-    if (profileToFollow.followers.includes(req.user._id)) {
-      await Profile.updateOne(
-        {
-          _id: profileId
-        },
-        {
-          $pull: {
-            followers: req.user._id //unfollowing the user.
-          }
-        }
-      )
-
-      await Profile.updateOne(
-        {
-          user: req.user._id
-        },
-        {
-          $pull: {
-            following: profileToFollow.user
-          }
-        }
-      )
-
-      return res.status(200).json({
-        success: true,
-        message: 'user unfollowed successfully'
-      })
+    if (profileToFollow?.followers?.includes(loggedInUserId)) {
+        await profileRepository.Unfollow(profileToFollow, loggedInUserId);
+        new ApiResponse(res).msg('User unfollowed successfully.').send();
     }
-
     //if the logged in user dont follow the user then i will let him follow the user
-    await Profile.updateOne(
-      {
-        _id: profileId
-      },
-      {
-        $push: {
-          followers: req.user._id
-        }
-      }
-    )
-    await Profile.updateOne(
-      {
-        user: req.user._id
-      },
-      {
-        $push: {
-          following: profileToFollow.user
-        }
-      }
-    )
-    //creating a notification
-    const notification = await Notification.create({
-      sender: req.user._id,
-      reciever: profileToFollow.user,
-      event: 'follow',
-      source: {
-        sourceId: loggedInUserProfile._id,
-        referance: 'Profile'
-      }
-    })
-    global.io.emit('Notification', notification)
+    await profileRepository.Follow(profileToFollow, loggedInUserId);
 
-    res.status(200).json({
-      success: true,
-      message: 'user followed successfully'
-    })
-  } catch (e) {
-    next(e)
-  }
-}
+    //creating a notification
+    const notification = await notificationRepository.Create({
+        sender: loggedInUserId,
+        reciever: profileToFollow.user,
+        event: 'follow',
+        source: {
+            sourceId: loggedInUserProfile._id,
+            referance: 'Profile',
+        },
+    });
+    global.io.emit('Notification', notification);
+    new ApiResponse(res).msg('User followed successfully.').send();
+};
 
 const FriendList = async (req, res, next) => {
-  try {
-    const loggedInUser = req.user._id
-    const profile = await Profile.findOne({ user: loggedInUser }).populate(
-      'friends'
-    ) //populating all the friends
-    if (!profile) {
-      throw new Error('you have to create a profile first')
-    }
-    if (profile.friends.length <= 0) {
-      return res.status(200).json({
-        success: true,
-        friends: 'Your friend list is empty!'
-      })
-    }
-    res.status(200).json({
-      success: true,
-      friends: profile.friends
-    })
-  } catch (e) {
-    next(e)
-  }
-}
+    const { _id: loggedInUser } = req.user;
+    const profile = await profileRepository.FindOne(
+        { user: loggedInUser },
+        { populate: 'friends' }
+    ); //populating all the friends
+    if (!profile) throw new BadRequestError('you have to create a profile first');
+    new ApiResponse(res).data({ friends: profile.friends }).send();
+};
 
 const friendRequests = async (req, res, next) => {
-  const loggedInUser = req.user._id
-  const profile = await Profile.findOne({ user: loggedInUser })
-  if (!profile) {
-    throw new Error('you have to create a profile first!')
-  }
-  if (profile.friendRequests.length <= 0) {
-    return res.status(200).json({
-      success: true,
-      friendRequests: 'you dont have any friend request!'
-    })
-  }
-  res.status(200).json({
-    success: true,
-    friendRequests: profile.friendRequests
-  })
-}
+    const { _id: loggedInUser } = req.user;
+    const profile = await profileRepository.FindOne(
+        { user: loggedInUser },
+        { populate: 'friendRequests' }
+    );
+
+    if (!profile) throw new BadRequestError('you have to create a profile first!');
+    new ApiResponse(res).data({ friendRequests: profile.friendRequests }).send();
+};
 
 const addFriend = async (req, res, next) => {
-  const { userId } = req.params
-
-  try {
-    if (req.user._id.toString() === userId.toString()) {
-      //checking if the user is not sending friend requests to himself.
-      throw new Error('user not found')
+    const { userId } = req.params;
+    const { _id: loggedInUserId } = req.user;
+    if (loggedInUserId?.toString() === userId?.toString()) throw new ForbiddenError();
+    const profile = await profileRepository.FindOne({ user: userId });
+    const loggedInUserProfile = await profileRepository.FindOne({ user: loggedInUserId });
+    if (!profile) throw new BadRequestError('users profile doesnt exist!');
+    if (profile?.friends?.includes(loggedInUserId))
+        throw new BadRequestError('user is already in your friend list');
+    if (profile?.friendRequests?.includes(loggedInUserId)) {
+        await profileRepository.RemoveFriendRequest(loggedInUserId, userId);
+        new ApiResponse(res).msg('Friend request cancelled.').send();
     }
-    const profile = await Profile.findOne({ user: userId })
-    const loggedInUserProfile = await Profile.findOne({ user: req.user._id })
-    if (!profile) throw new Error('users profile doesnt exist!')
-    if (profile.friends.includes(req.user._id))
-      throw new Error('user is already in your friend list')
-    if (profile.friendRequests.includes(req.user._id)) {
-      await Profile.updateOne(
-        { user: userId },
-        {
-          $pull: {
-            friendRequests: req.user._id
-          }
-        }
-      )
-      return res.status(200).json({
-        success: true,
-        message: 'friend request canceled!'
-      })
-    }
-
-    await Profile.updateOne(
-      { user: userId },
-      {
-        $push: {
-          friendRequests: req.user._id
-        }
-      }
-    )
-    await Profile.updateOne(
-      { _id: loggedInUserProfile._id },
-      {
-        $push: {
-          sendedFriendRequests: userId
-        }
-      }
-    )
-    const notification = await Notification.create({
-      sender: req.user._id,
-      reciever: userId,
-      event: 'friendRequest',
-      source: {
-        sourceId: loggedInUserProfile._id,
-        referance: 'Profile'
-      }
-    })
-    global.io.emit('Notification', notification)
-
-    res.status(200).json({
-      success: true,
-      message: 'friend request send'
-    })
-  } catch (e) {
-    next(e)
-  }
-}
+    await profileRepository.AddFriendRequest(loggedInUserId, userId);
+    const notification = await notificationRepository.Create({
+        sender: loggedInUserId,
+        reciever: userId,
+        event: 'friendRequest',
+        source: {
+            sourceId: loggedInUserProfile._id,
+            referance: 'Profile',
+        },
+    });
+    global.io.emit('Notification', notification);
+    new ApiResponse(res).msg('Friend request sended.').send();
+};
 
 const acceptFriendRequest = async (req, res, next) => {
-  const { userId } = req.params //friend req sender id
-  try {
-    const requestSenderProfile = await Profile.findOne({ user: userId }) //sender
-    const loggedInUserProfile = await Profile.findOne({ user: req.user._id }) //reciever
+    const { userId } = req.params; //friend req sender id
+    const { _id: loggedInUserId } = req.user;
+    const loggedInUserProfile = await profileRepository.FindOne({ user: loggedInUserId }); //reciever
+    if (!loggedInUserProfile) throw new BadRequestError('Profile is required to accept request');
+    if (!loggedInUserProfile?.friendRequests?.includes(userId))
+        throw new BadRequestError('No friend request found!');
+    const requestSenderProfile = await profileRepository.FindOne({ user: userId });
 
-    if (!loggedInUserProfile.friendRequests.includes(userId)) {
-      throw new Error('no friend request found!')
-    }
-    if (!requestSenderProfile) throw new Error('user not found!')
-    await Profile.updateOne(
-      { user: req.user._id },
-      {
-        $pull: {
-          friendRequests: userId
-        }
-      }
-    )
-    await Profile.updateOne(
-      { user: userId },
-      {
-        $push: {
-          friends: req.user._id
-        }
-      }
-    )
-    await Profile.updateOne(
-      { user: userId },
-      {
-        $pull: {
-          sendedFriendRequests: req.user._id
-        }
-      }
-    )
-    await Profile.updateOne(
-      { user: req.user._id },
-      {
-        $push: {
-          friends: userId
-        }
-      }
-    )
+    if (!requestSenderProfile) throw new BadRequestError('User dont have a profile.');
+    if (!requestSenderProfile?.sendedFriendRequests?.includes(loggedInUserId))
+        throw new BadRequestError('Invalid friend request!');
+    await profileRepository.AcceptFriendRequest(userId, loggedInUserId);
 
-    const notification = await Notification.create({
-      sender: req.user._id,
-      reciever: userId,
-      event: 'acceptFriendRequest',
-      source: {
-        sourceId: loggedInUserProfile._id,
-        referance: 'Profile'
-      }
-    })
-    global.io.emit('Notification', notification)
-
-    res.status(200).json({
-      success: true,
-      message: `${requestSenderProfile.name} is now your friend`
-    })
-  } catch (e) {
-    next(e)
-  }
-}
+    const notification = await notificationRepository.Create({
+        sender: loggedInUserId,
+        reciever: userId,
+        event: 'acceptFriendRequest',
+        source: {
+            sourceId: loggedInUserProfile._id,
+            referance: 'Profile',
+        },
+    });
+    global.io.emit('Notification', notification);
+    new ApiResponse(res).msg(`${requestSenderProfile?.name} is now your friend!`).send();
+};
 
 const deleteFriendRequest = async (req, res, next) => {
-  const { userId } = req.params
-  try {
-    const requestSenderProfile = await Profile.findOne({ user: userId }) //request sender profile
-    const loggedInUserProfile = await Profile.findOne({ user: req.user._id })
+    const { userId } = req.params;
+    const { _id: loggedInUserId } = req.user;
+    const requestSenderProfile = await profileRepository.FindOne({ user: userId }); //request sender profile
+    const loggedInUserProfile = await profileRepository.FindOne({ user: loggedInUserId });
+    if (!loggedInUserProfile?.friendRequests?.includes(userId))
+        throw new BadRequestError('no friend request found!');
+    if (!requestSenderProfile?.sendedFriendRequests?.includes(loggedInUserId))
+        throw new BadRequestError('Invalid friend requaest.');
 
-    if (!loggedInUserProfile.friendRequests.includes(userId)) {
-      throw new Error('no friend request found!')
-    }
-
-    await Profile.updateOne(
-      { user: req.user._id },
-      {
-        $pull: {
-          friendRequests: userId
-        }
-      }
-    )
-    res.status(200).json({
-      success: true,
-      message: 'friend request deleted successfully!'
-    })
-  } catch (e) {
-    next(e)
-  }
-}
+    await profileRepository.DeleteFriendRequest(userId, loggedInUserId);
+    new ApiResponse(res).msg('Friend request deleted successfully.').send();
+};
 
 const unfriend = async (req, res, next) => {
-  const { userId } = req.params
-  try {
-    if (req.user._id.toString() === userId.toString()) {
-      throw new Error('failed to unfriend user!')
-    }
-    const userToUnfriendprofile = await Profile.findOne({ user: userId })
-    const loggedInUserProfile = await Profile.findOne({ user: req.user._id })
+    const { userId } = req.params;
+    const { _id: loggedInUserId } = req.user;
+    if (loggedInUserId?.toString() === userId?.toString())
+        throw new Error('failed to unfriend user!');
+    const userToUnfriendprofile = await profileRepository.FindOne({ user: userId });
+    const loggedInUserProfile = await profileRepository.FindOne({ user: loggedInUserId });
     if (
-      !userToUnfriendprofile.friends.includes(req.user._id) &&
-      !loggedInUserProfile.friends.includes(userId)
-    ) {
-      throw new Error('user is not in your friend list')
-    }
-
-    await Profile.updateOne(
-      { user: userId },
-      {
-        $pull: {
-          friends: req.user._id
-        }
-      }
+        !userToUnfriendprofile?.friends?.includes(loggedInUserId) &&
+        !loggedInUserProfile?.friends?.includes(userId)
     )
-    await Profile.updateOne(
-      { user: req.user._id },
-      {
-        $pull: {
-          friends: userId
-        }
-      }
-    )
-    res.status(200).json({
-      success: true,
-      message: `${userToUnfriendprofile.name} is no longer your friend`
-    })
-  } catch (e) {
-    next(e)
-  }
-}
+        throw new BadRequestError('User is not in your friend list');
+    await profileRepository.Unfriend(loggedInUserId, userId);
+    new ApiResponse(res).msg(`${userToUnfriendprofile?.name} is no longer your friend.`).send();
+};
 
 module.exports = {
-  followAndUnfollow,
-  FriendList,
-  friendRequests,
-  addFriend,
-  unfriend,
-  acceptFriendRequest,
-  deleteFriendRequest
-}
+    followAndUnfollow,
+    FriendList,
+    friendRequests,
+    addFriend,
+    unfriend,
+    acceptFriendRequest,
+    deleteFriendRequest,
+};

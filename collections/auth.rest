@@ -1,5 +1,4 @@
 //domain
-//domain
 http://localhost:4000
 
 #this headers will sended to every request
@@ -9,9 +8,9 @@ Authorization: Bearer [your access token]
 --
 POST /api/auth/signup 
 {
-"name":"Muttaqin Muhammad",
-"email":"mdmuttaqin20@gmail.com",
-"password":"Muttaqin@123",
+"name":"Person One",
+"email":"Person1@gmail.com",
+"password":"Person1@123",
 "birthday":"11/03/2003",
 "gender":"male"
 }

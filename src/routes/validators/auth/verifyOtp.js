@@ -14,4 +14,4 @@ const validator = [
     objectId('otpId'),
 ];
 
-module.exports = [validator, validationResult];
+module.exports = validator;

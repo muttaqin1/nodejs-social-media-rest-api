@@ -5,4 +5,5 @@ module.exports = {
     TokenRepository: require('./repository/Token-Repository'),
     OtpRepository: require('./repository/Otp-Repository'),
     ProfileRepository: require('./repository/Profile-repository'),
+    NotificationRepository: require('./repository/Notification-repository'),
 };

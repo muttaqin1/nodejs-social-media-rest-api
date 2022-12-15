@@ -1,5 +1,4 @@
 const { body } = require('express-validator');
-const { validationResult } = require('../../middlewares');
 const validator = [
     body('email')
         .not()
@@ -10,5 +9,4 @@ const validator = [
         .isEmail()
         .withMessage('Invalid email.'),
 ];
-exports.validator = validator;
-module.exports = [validator, validationResult];
+module.exports = validator;

@@ -4,7 +4,6 @@ const userRepository = new UserRepository();
 const {
     AppError: { ValidationError, ApiError },
 } = require('../../../helpers');
-const { validationResult } = require('../../../middlewares');
 
 const validator = [
     body('name')
@@ -60,4 +59,4 @@ const validator = [
         .withMessage('Gender can be male, female, custom')
         .trim(),
 ];
-module.exports = [validator, validationResult];
+module.exports = validator;

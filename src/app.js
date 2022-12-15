@@ -9,7 +9,7 @@ const { globalErrorHandler, middlewares } = require('./middlewares');
 const io = require('socket.io')(server);
 global.io = io;
 
-const { auth, profile } = require('./routes');
+const { auth, profile, friend } = require('./routes');
 
 app.use(middlewares);
 
@@ -18,10 +18,9 @@ app.use('/api', profile);
 //app.use('/post', postRoute)
 //app.use('/comment', commentRoute)
 //app.use('/reply', replyRoute)
-//app.use('/security', securityRoute)
 //app.use('/story', storyRoute)
 //app.use('/notification', notificationRoute)
-//app.use('/friend', friendRoute)
+app.use('/friend', friend);
 
 app.use(globalErrorHandler);
 
