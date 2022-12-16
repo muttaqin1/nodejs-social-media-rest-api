@@ -1,18 +1,29 @@
-const router = require('express').Router()
+const router = require('express').Router();
 const {
-  getStories,
-  getSingleStory,
-  createStory,
-  deleteStory
-} = require('../controllers/story')
-const upload = require('../helpers/photoUploader')
+    story: { getStories, getSingleStory, createStory, deleteStory },
+} = require('../controllers');
+const {
+    AsyncHandler,
+    fileUpload: { singleImageUploader },
+} = require('../helpers');
+const { Authentication } = require('../auth');
+const objectId = require('./validators/objectId');
+const { validationResult } = require('../middlewares');
 
-//middlewares
-const auth = require('../middlewares/common/auth')
+router.get('/profile/story', Authentication, AsyncHandler(getStories));
+router.get(
+    '/profile/story/:id',
+    Authentication,
+    objectId('id'),
+    validationResult,
+    AsyncHandler(getSingleStory)
+);
+router.post(
+    '/profile/story',
+    Authentication,
+    singleImageUploader('story', 'stories'),
+    AsyncHandler(createStory)
+);
+router.delete('/profile/story/:id', Authentication, objectId('id'), validationResult, deleteStory);
 
-router.get('/', auth, getStories)
-router.get('/:storyId', auth, getSingleStory)
-router.post('/', auth, upload.single('story'), createStory)
-router.delete('/:storyId', auth, deleteStory)
-
-module.exports = router
+module.exports = router;

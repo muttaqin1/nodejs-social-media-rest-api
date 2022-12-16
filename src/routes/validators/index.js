@@ -1,4 +1,5 @@
 module.exports = {
+    objectIdValidator: require('./objectId'),
     Auth: {
         signinValidator: require('./auth/signIn'),
         signupValidator: require('./auth/signUp'),
@@ -10,6 +11,17 @@ module.exports = {
     },
     profile: {
         profileValidator: require('./profile/profileValidator'),
-        objectIdValidator: require('./objectId'),
+    },
+    post: {
+        createPostValidator: require('./post/createPost'),
+        editPostValidator: require('./post/editPost'),
+    },
+    comment: {
+        createCommentValidator: require('./comment/createComment'),
+        editCommentValidator: require('./comment/editComment'),
+    },
+    reply: {
+        createReplyValidator: require('./reply/createReply'),
+        editReplyValidator: require('./reply/editReply'),
     },
 };

@@ -25,9 +25,9 @@ class BaseRepository {
             throw new ApiError(`Data not found!`);
         }
     }
-    async Find(query) {
+    async Find(query, options) {
         try {
-            return await this.model.find(query);
+            return await this.model.find(query).select(options?.select).populate(options?.populate);
         } catch {
             throw new ApiError('Data not found!');
         }
@@ -43,18 +43,27 @@ class BaseRepository {
             throw new ApiError('Data not found!');
         }
     }
-    async Update(query, update) {
+    async Update(query, update, options) {
         try {
-            return await this.model.findOneAndUpdate(query, update, { new: true });
+            return await this.model
+                .findOneAndUpdate(query, update, { new: true })
+                .populate(options?.populate);
         } catch {
             throw new ApiError('Failed to update data!');
         }
     }
     async DeleteOne(query) {
         try {
-            return await this.model.deleteOne(query);
+            return await this.model.findOneAndDelete(query, { new: true });
         } catch {
             throw new ApiError('Failed to delete data!');
+        }
+    }
+    async DeleteMany(query) {
+        try {
+            return await this.model.deleteMany(query);
+        } catch {
+            throw new ApiError();
         }
     }
 
@@ -76,11 +85,15 @@ class BaseRepository {
             throw new ApiError('Failed to unset data!');
         }
     }
-    async PushData(query, values) {
+    async PushData(query, values, options) {
         try {
-            return await this.Update(query, {
-                $push: values,
-            });
+            return await this.Update(
+                query,
+                {
+                    $push: values,
+                },
+                options
+            );
         } catch {
             throw new ApiError('Failed to push data!');
         }

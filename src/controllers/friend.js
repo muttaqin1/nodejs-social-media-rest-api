@@ -23,7 +23,7 @@ const followAndUnfollow = async (req, res, next) => {
     //checking if the logged in user already follows the person .then i will let him unfollow the user
     if (profileToFollow?.followers?.includes(loggedInUserId)) {
         await profileRepository.Unfollow(profileToFollow, loggedInUserId);
-        new ApiResponse(res).msg('User unfollowed successfully.').send();
+        return new ApiResponse(res).msg('User unfollowed successfully.').send();
     }
     //if the logged in user dont follow the user then i will let him follow the user
     await profileRepository.Follow(profileToFollow, loggedInUserId);
@@ -74,7 +74,7 @@ const addFriend = async (req, res, next) => {
         throw new BadRequestError('user is already in your friend list');
     if (profile?.friendRequests?.includes(loggedInUserId)) {
         await profileRepository.RemoveFriendRequest(loggedInUserId, userId);
-        new ApiResponse(res).msg('Friend request cancelled.').send();
+        return new ApiResponse(res).msg('Friend request cancelled.').send();
     }
     await profileRepository.AddFriendRequest(loggedInUserId, userId);
     const notification = await notificationRepository.Create({

@@ -1,13 +1,15 @@
 const router = require('express').Router();
 const {
-    followAndUnfollow,
-    FriendList,
-    friendRequests,
-    addFriend,
-    unfriend,
-    acceptFriendRequest,
-    deleteFriendRequest,
-} = require('../controllers/friend');
+    friend: {
+        followAndUnfollow,
+        FriendList,
+        friendRequests,
+        addFriend,
+        unfriend,
+        acceptFriendRequest,
+        deleteFriendRequest,
+    },
+} = require('../controllers');
 const { Authentication } = require('../auth');
 const { validationResult } = require('../middlewares');
 const ObjectId = require('./validators/objectId');

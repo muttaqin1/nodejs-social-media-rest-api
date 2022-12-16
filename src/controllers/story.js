@@ -1,116 +1,69 @@
-//const cloudinary = require('../helpers/cloudinary')
-const Story = require('../models/Storie')
-const Profile = require('../models/Profile')
-const storyAlert = require('../helpers/notification/storyAlert')
+const { ProfileRepository, StoryRepository, NotificationRepository } = require('../database');
+const {
+    fileUpload: {
+        cloudinary: { uploader },
+    },
+} = require('../helpers');
+
+const profileRepository = new ProfileRepository();
+const storyRepository = new StoryRepository();
+const notificationRepository = new NotificationRepository();
+const {
+    ApiResponse,
+    AppError: { ForbiddenError, BadRequestError },
+} = require('../helpers');
 
 const getStories = async (req, res, next) => {
-    try {
-        const profile = await Profile.findOne({ user: req.user._id })
-        if (profile.friends.length === 0) {
-            const userStory = await Story.find({ creator: req.user._id })
-            if (!userStory) throw new Error('No story to show!')
-            return res.status(200).json({
-                success: true,
-                userStory,
-            })
-        }
-        const getAllStories = profile.friends.unshift(req.user._id)
-        const stories = Story.find({
-            creator: { $in: getAllStories },
-        })
-        res.status(200).json({
-            success: true,
-            stories,
-        })
-    } catch (e) {
-        next(e)
+    const { _id: loggedInUserId } = req.user;
+    const profile = await profileRepository.FindOne({ user: loggedInUserId });
+    if (profile.friends.length === 0) {
+        const userStory = await storyRepository.FindOne({ creator: loggedInUserId });
+        if (!userStory) new ApiResponse(res).data({ stories: [] }).send();
     }
-}
+    const getAllStories = profile.friends.unshift(loggedInUserId);
+    const stories = Story.find({ creator: { $in: getAllStories } });
+    new ApiResponse(res).data({ stories }).send();
+};
 const getSingleStory = async (req, res, next) => {
-    const { storyId } = req.params
-    try {
-        const story = await Story.findOne({ _id: storyId })
-        const storyCreatorProfile = await Profile.findOne({ user: story.creator })
+    const { id: storyId } = req.params;
+    const story = await storyRepository.FindOne({ _id: storyId });
+    const storyCreatorProfile = await storyRepository.FindOne({ user: story?.creator });
+    if (story?.creator?.toString() === loggedInUserId?.toString())
+        new ApiResponse(res).data({ story }).send();
 
-        if (story.creator.toString() === req.user._id.toString()) {
-            return res.status(200).json({
-                success: true,
-                story,
-            })
-        }
-        if (story.privicy.toUpperCase() !== 'PUBLIC') {
-            if (!storyCreatorProfile.friends.includes(req.user._id))
-                throw new Error('story is visible to his friends only!')
-            return res.status(200).json({
-                success: true,
-                story,
-            })
-        }
-
-        res.status(200).json({
-            success: true,
-            story,
-        })
-    } catch (e) {
-        next(e)
+    if (story.privicy.toUpperCase() !== 'PUBLIC') {
+        if (!storyCreatorProfile?.friends?.includes(loggedInUserId))
+            throw new ForbiddenError('Story is visible to his friends only!');
+        return new ApiResponse(res).data({ story }).send();
     }
-}
+    new ApiResponse(res).data({ story }).send();
+};
 
 const createStory = async (req, res, next) => {
-    try {
-        if (!req.file) {
-            throw new Error('story can not be empty!')
-        }
-
-        const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: 'Stories',
-        })
-        const { secure_url, public_id } = result
-
-        const story = new Story({
-            creator: req.user._id,
-            image: {
-                secureUrl: secure_url,
-                publicId: public_id,
-            },
-            privicy: req.body.privicy,
-        })
-        const createdStory = await story.save()
-
-        await storyAlert(createdStory)
-
-        res.status(200).json({
-            success: true,
-            createdStory,
-        })
-    } catch (e) {
-        next(e)
-    }
-}
+    if (!req.image) throw new BadRequestError('story can not be empty!');
+    const story = await storyRepository.Create({
+        creator: req.user._id,
+        image: req.image,
+        privicy: req.body.privicy,
+    });
+    await notificationRepository.AlertStory(story);
+    new ApiResponse(res).data({ story }).send();
+};
 const deleteStory = async (req, res, next) => {
-    const { storyId } = req.params
-    try {
-        const story = await Story.findOne({ _id: storyId })
-        if (!story) {
-            throw new Error('No story found!')
-        }
-        if (story.creator.toString() !== req.user._id.toString()) {
-            throw new Error('only creators can delete their story!')
-        }
-        await cloudinary.uploader.destroy(story.image.publicId)
-        await Story.deleteOne({ _id: storyId })
-        res.status(200).json({
-            success: true,
-            message: 'Story deleted successfuly',
-        })
-    } catch (e) {
-        next(e)
-    }
-}
+    const { id: storyId } = req.params;
+    const { _id: loggedInUserId } = req.user;
+    const story = await StoryRepository.FindOne({ _id: storyId });
+    if (!story) throw new BadRequestError('No story found!');
+    if (story?.creator?.toString() !== loggedInUserId?.toString())
+        throw new ForbiddenError('only creators can delete their story!');
+    await uploader.destroy(story?.image?.publicId);
+    await storyRepository.DeleteOne({ _id: storyId });
+    new ApiResponse(res).data({ story }).send();
+};
 
 module.exports = {
     getStories,
     getSingleStory,
     createStory,
     deleteStory,
-}
+};

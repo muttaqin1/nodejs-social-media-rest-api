@@ -4,7 +4,8 @@ const {
     profile: { getMyProfile, getUserProfile, createProfile, editProfile },
 } = require('../controllers');
 const {
-    profile: { profileValidator, objectIdValidator },
+    objectIdValidator,
+    profile: { profileValidator },
 } = require('./validators');
 const {
     AsyncHandler,
